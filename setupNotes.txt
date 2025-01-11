@@ -1,0 +1,14 @@
+This command runs my local server for testing the APIs with http request
+poetry run python -m uvicorn src.main:app --reload --log-level info
+
+This command runs my local server for testing the APIs with and https request
+poetry run python -m uvicorn src.main:app --reload --log-level info --host 127.0.0.1 --port 8000 --ssl-keyfile=key.pem --ssl-certfile=cert.pem
+
+These commands create permision keys that allow fastAPI to use https requests over an http requests. It is necessary for an instagram webhook
+openssl req -x509 -newkey rsa:2048 -keyout key.pem -out cert.pem -days 365 -nodes
+
+
+for ngrok
+need to make an authentication key
+Sign up for an account: https://dashboard.ngrok.com/signup
+ERROR:  Install your authtoken: https://dashboard.ngrok.com/get-started/your-authtoken
