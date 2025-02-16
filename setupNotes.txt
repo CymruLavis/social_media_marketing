@@ -8,7 +8,29 @@ These commands create permision keys that allow fastAPI to use https requests ov
 openssl req -x509 -newkey rsa:2048 -keyout key.pem -out cert.pem -days 365 -nodes
 
 
-for ngrok
-need to make an authentication key
-Sign up for an account: https://dashboard.ngrok.com/signup
-ERROR:  Install your authtoken: https://dashboard.ngrok.com/get-started/your-authtoken
+for ngrok:
+Authtoken saved to configuration file: C:\Users\Ethan Lavis\AppData\Local/ngrok/ngrok.yml
+```ngrok http 8000``` creates a tunnel for the local API
+ngrok http --url=useful-chamois-flowing.ngrok-free.app 8000
+
+
+For instagram:
+PlainTextRespose is important since fastAPI naturally serializes response as a JSON fromatt --> this is only needed for the initial set up. It can be commented out later
+@app.get('/comment')
+def root(request: Request):
+    hub_mode = request.query_params.get('hub.mode')
+    hub_challenge = request.query_params.get('hub.challenge')
+    hub_verify_token = request.query_params.get('hub.verify_token')
+
+    logging.info("We made it to the comment")
+
+    logging.info(f"Hub Mode: {hub_mode}")
+    logging.info(f"Hub Challenge: {hub_challenge}")
+    logging.info(f"Hub Verify Token: {hub_verify_token}")
+
+    if hub_verify_token == "12345" and hub_mode == "subscribe":
+        logging.info("Verfied")
+        logging.info(f"{hub_challenge} is of type {type(hub_challenge)}")
+        return PlainTextResponse(content=hub_challenge)  # Echo the hub.challenge value
+    else:
+        return {"status": "Verification failed"}, 403
