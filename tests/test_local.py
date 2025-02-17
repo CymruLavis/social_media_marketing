@@ -12,6 +12,7 @@ import httpx
 import pytest
 import json
 from fastapi import Request
+
 # This termincal command is to run a local server
 # poetry run python -m uvicorn src.main:app --reload --log-level info
 """
@@ -21,6 +22,7 @@ BASE_URL = "http://127.0.0.1:8000/{endpoint}" # update this if your url is diffe
 INDEX = BASE_URL.format(endpoint="")
 WEBHOOK_ENDPOINT = BASE_URL.format(endpoint="comment")
 PRIVACY_POLICY_ENDPOINT = BASE_URL.format(endpoint="privacy_policy")
+SEND_DM_ENDPOINT = BASE_URL.format(endpoint="send_dm")
 
 
 def test_uvicorn_container_call():
@@ -76,4 +78,16 @@ def test_privacy_policy():
     assert response.status_code == 200
 
 def test_send_dm():
-    pass
+    request_data = {
+        "IGS_ID": 645002241335339,
+        "IG_ID": 17841432983479716,
+        "custom_message": "Buy my stuff"
+    }
+    with httpx.Client(verify=False) as client:
+        response = client.post(
+            SEND_DM_ENDPOINT,
+            json= request_data,
+            timeout=30
+        )
+    logging.info(f"Response Content: {response.text}")
+    assert response.status_code == 200
