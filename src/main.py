@@ -1,4 +1,5 @@
 import logging
+from typing import Any
 logging.basicConfig(
     level=logging.INFO,  # Set the log level (DEBUG, INFO, WARNING, ERROR, CRITICAL)
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
@@ -11,6 +12,8 @@ from fastapi import FastAPI, Request
 from fastapi.responses import PlainTextResponse, HTMLResponse
 import json
 import os
+
+from src.codeFiles.response_handler import comment_handler, send_message
 
 # logger = logging.getLogger("my_fastapi_app")
 
@@ -34,13 +37,12 @@ async def root(request: Request):
     if request.method == "POST":
         try:
             request_data = await request.json()
-            logging.info(f"Recieved: {request_data.get("entry")}")
+            response = comment_handler(request=request_data)
+            if response is None:
+                logging.warning(f"Unable to handle request: {request_data}")
+                return PlainTextResponse(content="FAILURE", status_code=400)
 
             return PlainTextResponse(content="Success", status_code=200)
-            
-            # requrest_data = request.query_params.get("field")
-            # logging.info(f"THE CAPTURED DATA IS: {requrest_data}")
-            # return PlainTextResponse(content="POST recieved", status_code=200)
         except Exception as e:
             logging.error(f"Error processing POST request: {e}")
             return PlainTextResponse(content="FAILURE", status_code=400)
@@ -62,3 +64,8 @@ async def root(request: Request):
             return PlainTextResponse(content=hub_challenge)  # Echo the hub.challenge value
         else:
             return "<p>Verification Failed</p>"
+        
+@app.post('/send_dm')
+def send_dm(request_data: dict[str,Any]):
+    send_message(IGSID=request_data['IGS_ID'], IG_ID=request_data['IG_ID'], custom_message=request_data['custom_message'])
+    return PlainTextResponse(content="Success", status_code=200)
